@@ -1,0 +1,28 @@
+SELECT s.*,m.room_id FROM schedules 
+		JOIN meeting_rooms m ON s.room_id = m.room_id
+                              WHERE room_id = '$room_id'
+                                AND start_date = '$start_date'
+                                AND (
+                                    (start_time <= '$start_time' AND end_time >= '$start_time') OR
+                                    (start_time <= '$end_time' AND end_time >= '$end_time') OR
+                                    (start_time >= '$start_time' AND end_time <= '$end_time')
+ 				AND s.persons < '$persons'
+                                )
+								
+SELECT s.*, m.room_name, m.location, sec.sector_name, adm.admin_name, us.user_name
+                  FROM schedules s
+                  JOIN meeting_rooms m ON s.room_id = m.room_id
+                  JOIN sectors sec ON s.sector_id = sec.sector_id
+                  JOIN administrations adm ON s.admin_id = adm.admin_id
+				  JOIN users us ON s.user_id = us.user_id
+                  WHERE s.start_date BETWEEN '$start_date' AND '$end_date'"
+2023-11-27   14:00:00
+
+SELECT m.* FROM schedules s JOIN meeting_rooms m ON s.room_id = m.room_id WHERE start_date = '2023-11-27' AND ( (start_time <= '14:00:00' AND end_time >= '14:00:00') OR (start_time <= '15:00:00' AND end_time >= '15:00:00') OR (start_time >= '14:00:00' AND end_time <= '15:00:00') AND s.persons < 7 ) AND floor_id = 4;
+
+
+ <?php while($roomRow = mysqli_fetch_assoc($roomNameResult) ){ ?>
+			      <option value="<?php echo $roomRow['room_id'];?>"><?php echo $roomRow['room_name'];?></option>
+			  	  <?php } ?>
+
+onchange="showRoom(this.value)"

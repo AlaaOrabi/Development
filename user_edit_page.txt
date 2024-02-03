@@ -1,0 +1,84 @@
+<?php
+session_start(); // Start the session
+
+if (!isset($_SESSION['user_id'])) {
+    // If the user is not logged in, redirect to the login page
+    header("Location: login_page.php");
+    exit();
+}
+
+// Your database connection code here
+include_once("db_connection.php"); // Assuming you have a separate file for database connection
+
+// Check if the meeting_id parameter is set in the URL
+if (isset($_GET['meeting_id'])) {
+    $meeting_id = $_GET['meeting_id'];
+
+    // Fetch meeting details for editing
+    $editMeetingQuery = "
+        SELECT s.*, CONCAT(m.room_name, ', ', m.location) AS room_details
+        FROM schedule s
+        INNER JOIN meeting_room m ON s.room_id = m.room_id
+        WHERE s.meeting_id = $meeting_id
+        AND s.user_id = {$_SESSION['user_id']}";
+    
+    $editMeetingResult = $conn->query($editMeetingQuery);
+
+    // Check if the meeting exists
+    if ($editMeetingResult->num_rows > 0) {
+        $meetingDetails = $editMeetingResult->fetch_assoc();
+    } else {
+        // Redirect to the user dashboard if the meeting doesn't exist or doesn't belong to the user
+        header("Location: user_dashboard.php");
+        exit();
+    }
+} else {
+    // Redirect to the user dashboard if the meeting_id parameter is not set
+    header("Location: user_dashboard.php");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Meeting</title>
+    <!-- Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h2 class="text-center">Edit Meeting</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Your HTML form for editing -->
+                    <form method="post" action="process_edit.php">
+                        <!-- Include input fields for meeting details -->
+                        <div class="form-group">
+                            <label for="meeting_title">Meeting Title:</label>
+                            <input type="text" id="meeting_title" name="meeting_title" class="form-control" value="<?php echo $meetingDetails['meeting_title']; ?>" required>
+                        </div>
+                        <!-- ... Add more input fields as needed ... -->
+
+                        <button type="submit" class="btn btn-warning btn-block">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and jQuery scripts (place them at the end of the body for better performance) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
